@@ -4,39 +4,85 @@ import {Cat, CatType} from "./app.model";
 
 
 const app: express.Express = express();
-
+//* logging middleware
 app.use((req, res, next) => {
     console.log(req.rawHeaders[1]);
     console.log('this is logging middleware')
     next();
 });
 
-app.get('/cats/som',(req, res, next) => {
-    console.log(req.rawHeaders[1]);
-    console.log('this is som middleware')
-    next();
+//* JSON middleware
+app.use(express.json());
+
+
+//* READ 고양이 전체 데이터 다 조회
+app.get('/cats/', (req, res) => {
+    try {
+        const cats = Cat;
+        // throw new Error('db connect error');
+        res.status(200).send({
+            success: true,
+            data: {
+                cats,
+            },
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            error: error.message,
+        })
+    }
 });
 
-// const data = [1, 2, 3, 4];
+//* READ 특정 고양이 데이터 조회
+app.get('/cats/:id', (req, res) => {
+    try {
+        const params = req.params;
 
-app.get('/', (req, res) => {
-    res.send({cats: Cat})
+        const cat = Cat.find((cat)=>{
+            return cat.id === params.id;
+        });
+
+        res.status(200).send({
+            success: true,
+            data: {
+                cat,
+            },
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            error: error.message,
+        })
+    }
+});
+
+//* CREATE 새로운 고양이 추가
+app.post('/cats', (req, res) => {
+    try {
+        const data =  req.body;
+        console.log(data);
+        Cat.push(data); //create
+
+        res.status(200).send({
+            success: true,
+            data: {data},
+        });
+    } catch (error) {
+        res.status(400).send({
+            success: false,
+            error: error.message,
+        })
+    }
 });
 
 
-app.get('/cats/blue', (req, res) => {
-    res.send({cats:Cat, blue: Cat[0]})
-});
-
-app.get('/cats/som', (req, res) => {
-    res.send({cats:Cat, som: Cat[1]})
+//* 404 middleware
+app.use((req, res, next) => {
+    console.log('this is error middleware')
+    res.send({error:'404 not found error'})
 });
 
 app.listen(8000, () => {
     console.log('server is on...');
-});
-
-app.use((req, res, next) => {
-    console.log('this is error middleware')
-    res.send({error:'404 not found error'})
 });
