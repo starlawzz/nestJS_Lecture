@@ -43,4 +43,4 @@ exports.Cat = [
         friends: [],
     },
 ];
-//# sourceMappingURL=app.model.js.map
+//# sourceMappingURL=cats.model.js.map
